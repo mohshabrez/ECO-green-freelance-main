@@ -52,31 +52,6 @@ function IntroPage() {
     </div>
   </div>
 </div>
-<div className="flex overflow-x-auto gap-4">
-  {content.map((item) => (
-    <div
-      key={item.id} // Add a unique key for each item
-      className={`w-full cursor-pointer bg-white rounded-2xl mt-4 mb-4 shadow-md px-4 py-6 flex flex-col items-start justify-between border border-gray-200 hover:border-green-500 transition-colors duration-300 hover:transform hover:-translate-y-1`}
-    >
-      <div className="flex items-center gap-2">
-        <img
-          className="w-20 h-20 object-cover rounded-md" // Reduced size and added full border radius
-          src={item.icon}
-          alt={item.title}
-        />
-        <h3 className="text-lg font-bold text-center">{item.title}</h3>
-      </div>
-      <p className="text-base opacity-75 my-2">{item.description}</p>
-      <div className="relative left-2/4"> {/* Separate container for right alignment */}
-      <svg className="h-7 w-7 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-</svg>
-
-      </div>
-    </div>
-  ))}
-</div>
-
 </>
   
   

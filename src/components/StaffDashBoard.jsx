@@ -28,19 +28,98 @@ function StaffDashBoard() {
 
 function DataEntry() {
   const [formData, setFormData] = useState({
-    date: '',
-    weightInPounds: '',
+    date: '2024-02-01',
+    weightInPounds: 10.00,
     landfillFee: null,
-    buyerRevenue: '',
+    buyerRevenue: 5.00,
     category: {
       categoryId: null,
-      categoryName: ''
     },
-    subCategory: '', // Add subCategory field
     buyer: {
-      buyerId: ''
-    }
+      buyerId: 2,
+    },
   });
+
+  const categoryData = [
+    {
+      "category_id": 1,
+      "category_name": "Landfill Waste",
+      "sub_waste_type": "Landfill Waste",
+      "waste_type": "Landfill Waste"
+    },
+    {
+      "category_id": 2,
+      "category_name": "Compost",
+      "sub_waste_type": "Compost",
+      "waste_type": "Compost"
+    },
+    {
+      "category_id": 3,
+      "category_name": "Recyclables",
+      "sub_waste_type": "Cardboard",
+      "waste_type": "Cardboard"
+    },
+    {
+      "category_id": 4,
+      "category_name": "Recyclables",
+      "sub_waste_type": "Glass",
+      "waste_type": "Glass"
+    },
+    {
+      "category_id": 5,
+      "category_name": "Recyclables",
+      "sub_waste_type": "Mixed Paper",
+      "waste_type": "Paper"
+    },
+    {
+      "category_id": 6,
+      "category_name": "Recyclables",
+      "sub_waste_type": "Newspaper",
+      "waste_type": "Paper"
+    },
+    {
+      "category_id": 7,
+      "category_name": "Recyclables",
+      "sub_waste_type": "White Office",
+      "waste_type": "Paper"
+    },
+    {
+      "category_id": 8,
+      "category_name": "Recyclables",
+      "sub_waste_type": "Aluminum",
+      "waste_type": "Metal"
+    },
+    {
+      "category_id": 9,
+      "category_name": "Recyclables",
+      "sub_waste_type": "Food cans",
+      "waste_type": "Metal"
+    },
+    {
+      "category_id": 10,
+      "category_name": "Recyclables",
+      "sub_waste_type": "Scrap metal",
+      "waste_type": "Metal"
+    },
+    {
+      "category_id": 11,
+      "category_name": "Recyclables",
+      "sub_waste_type": "#1 PET",
+      "waste_type": "Plastic"
+    },
+    {
+      "category_id": 12,
+      "category_name": "Recyclables",
+      "sub_waste_type": "#2 HDPE Colored",
+      "waste_type": "Plastic"
+    },
+    {
+      "category_id": 13,
+      "category_name": "Recyclables",
+      "sub_waste_type": "#2 HDPE Natual",
+      "waste_type": "Plastic"
+    }
+  ]
 
   const [financialYearData, setFinancialYearData] = useState([]);
 
@@ -63,28 +142,38 @@ function DataEntry() {
   
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setFormData(prevFormData => {
-      if (name === 'category') {
-        return {
-          ...prevFormData,
-          [name]: { categoryId: value, categoryName: '' }, // Reset categoryName when category changes
-          subCategory: '' // Reset subCategory when category changes
-        };
-      } else if (name === 'subCategory') {
-        return { ...prevFormData, [name]: value };
-      } else if (name === 'buyerId') { // Handle buyerId separately
-        return {
-          ...prevFormData,
-          buyer: {
-            ...prevFormData.buyer,
-            [name]: value
-          }
-        };
-      } else {
-        return { ...prevFormData, [name]: value };
-      }
-    });
+  
+    if (name === 'category') {
+      const selectedCategory = categoryData.find(cat => cat.category_id === parseInt(value));
+      
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        category: { categoryId: selectedCategory.category_id },
+        subCategory: '' // Reset subCategory when category changes
+      }));
+    } else if (name === 'subCategory') {
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        [name]: value
+      }));
+    } else if (name === 'buyerId') {
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        buyer: {
+          ...prevFormData.buyer,
+          buyerId: value
+        }
+      }));
+    } else {
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        [name]: value
+      }));
+    }
   };
+  
+  
+  
   
 
 
@@ -133,13 +222,13 @@ function DataEntry() {
     const newEntry = {
       date: formData.date,
       weightInPounds: parseFloat(formData.weightInPounds),
-      landfillFee: formData.landfillFee,
+      landfillFee: formData.category.categoryName === 'Landfill Waste' ? formData.landfillFee : null,
       buyerRevenue: parseFloat(formData.buyerRevenue),
       category: formData.category,
-      subCategory: formData.subCategory, // Include subCategory in the newEntry object
+      subCategory: formData.category.categoryName === 'Recyclables' ? formData.subCategory : '',
       buyer: { buyerId: parseInt(formData.buyer.buyerId) || null }
     };
-    console.log(newEntry); // You can handle the submission of newEntry here
+    console.log(newEntry);
     setFormData({
       date: '',
       weightInPounds: '',
@@ -149,131 +238,133 @@ function DataEntry() {
         categoryId: null,
         categoryName: ''
       },
-      subCategory: '', // Reset subCategory
+      subCategory: '',
       buyer: {
         buyerId: ''
       }
     });
   };
   
-  const renderAdditionalFields = () => {
-    switch (formData.category.categoryId) {
-      case '1': // Landfill Waste
-        return (
-          <>
+  const renderSubCategories = () => {
+    const selectedCategory = categoryData.find(cat => cat.category_id === parseInt(formData.category.categoryId));
+    if (selectedCategory) {
+      switch (selectedCategory.category_name) {
+        case 'Landfill Waste':
+          return (
             <label htmlFor="landfillFee" className="block text-gray-700 font-medium mt-4">
               Landfill Fee:
+              <input
+                type="number"
+                id="landfillFee"
+                name="landfillFee"
+                value={formData.landfillFee === null ? '' : formData.landfillFee}
+                onChange={handleInputChange}
+                className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
             </label>
-            <input
-              type="number"
-              id="landfillFee"
-              name="landfillFee"
-              value={formData.landfillFee === null ? '' : formData.landfillFee}
-              onChange={handleInputChange}
-              className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </>
-        );
-      case '2': // Compost
-        return (
-          <>
-            {/* Additional fields for Compost */}
-          </>
-        );
-      case '3': // Recyclables
-        return (
-          <>
-            <label htmlFor="subCategory" className="block text-gray-700 font-medium mt-4">
-              Sub Waste Type:
-            </label>
-            <select
-              id="subCategory"
-              name="subCategory"
-              value={formData.subCategory}
-              onChange={handleInputChange}
-              className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              required
-            >
-              <option value="">Select Sub Waste Type</option>
-              <option value="Cardboard">Cardboard</option>
-              <option value="Glass">Glass</option>
-              <option value="Paper">Paper</option>
-              <option value="Metal">Metal</option>
-              <option value="Plastic">#1 PET</option>
-              <option value="Plastic">#2 HDPE Colored</option>
-              <option value="Plastic">#2 HDPE Natural</option>
-            </select>
+          );
+        case 'Recyclables':
+          return (
+            <>
             <label htmlFor="buyerId" className="block text-gray-700 font-medium mt-4">
-              Buyer ID:
-            </label>
-            <input
-              type="number"
-              id="buyerId"
-              name="buyerId"
-              value={formData.buyer.buyerId === null ? '' : formData.buyer.buyerId}
-              onChange={handleInputChange}
-              required
-              className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </>
-        );
-      default:
-        return null;
+        Buyer ID:
+        <input
+          type="number"
+          id="buyerId"
+          name="buyerId"
+          value={formData.buyer.buyerId === null ? '' : formData.buyer.buyerId}
+          onChange={handleInputChange}
+          required
+          className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </label>
+              <label htmlFor="subCategory" className="block text-gray-700 font-medium mt-4">
+                Sub Waste Type:
+              </label>
+              <select
+                id="subCategory"
+                name="subCategory"
+                value={formData.subCategory}
+                onChange={handleInputChange}
+                className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select Sub Waste Type</option>
+                {categoryData.filter(cat => cat.category_name === 'Recyclables').map(cat => (
+                  <option key={cat.category_id} value={cat.sub_waste_type}>{cat.sub_waste_type}</option>
+                ))}
+              </select>
+              
+            </>
+          );
+        default:
+          return null;
+      }
+    } else {
+      return null;
     }
   };
   
   
+  
     return (
       <div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-1 items-center">
-          <label htmlFor="date" className="block text-gray-700 font-medium mt-4">
-            Date:
-          </label>
-          <input
-            type="date"
-            id="date"
-            name="date"
-            value={formData.date}
-            onChange={handleInputChange}
-            required
-            className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <label htmlFor="weight" className="block text-gray-700 font-medium mt-4">
-            Weight (lbs):
-          </label>
-          <input
-            type="number"
-            id="weight"
-            name="weightInPounds"
-            value={formData.weightInPounds}
-            onChange={handleInputChange}
-            required
-            className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <label htmlFor="type" className="block text-gray-700 font-medium mt-4">
-            Type:
-          </label>
-          <select
-            id="type"
-            name="category"
-            value={formData.category.categoryId}
-            onChange={handleInputChange}
-            className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            required
-          >
-            <option value="">Select Type</option>
-            <option value="1">Landfill</option>
-            <option value="2">Compost</option>
-            <option value="3">Recyclables</option>
-          </select>
-          {renderAdditionalFields()}
-          <button
-            type="submit"
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md mt-6 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
-          >
-            Submit
-          </button>
-        </form>
+
+<div className="flex justify-center items-center h-full">
+  <div className="container mx-auto py-8">
+    <h2 className="text-center">Enter Waste Data</h2>
+    <form onSubmit={handleSubmit} className="mt-4">
+      <label htmlFor="date" className="block text-gray-700 font-medium">
+        Date:
+        <input
+          type="date"
+          id="date"
+          name="date"
+          value={formData.date}
+          onChange={handleInputChange}
+          className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          required
+        />
+      </label>
+      <label htmlFor="weightInPounds" className="block text-gray-700 font-medium mt-4">
+        Weight (in pounds):
+        <input
+          type="number"
+          id="weightInPounds"
+          name="weightInPounds"
+          value={formData.weightInPounds}
+          onChange={handleInputChange}
+          className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          required
+        />
+      </label>
+      <label htmlFor="category" className="block text-gray-700 font-medium mt-4">
+        Category:
+        <select
+          id="category"
+          name="category"
+          value={formData.category.categoryId || ''}
+          onChange={handleInputChange}
+          className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          required
+        >
+          <option value="">Select Category</option>
+          {categoryData.map(cat => (
+            <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
+          ))}
+        </select>
+      </label>
+      {renderSubCategories()}
+      
+      <button type="submit" className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+        Submit
+      </button>
+    </form>
+  </div>
+</div>
+
+
+
         <h2 className="text-center text-xl font-bold mt-4">Dummy Data Table</h2>
         <table className="w-full table-auto shadow-md rounded-lg">
           <thead>
@@ -324,6 +415,7 @@ function DataEntry() {
         </table>
       </div>
     );
-  }    
+    }    
+   
 
 export default StaffDashBoard;
