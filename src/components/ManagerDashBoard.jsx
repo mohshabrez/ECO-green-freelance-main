@@ -58,16 +58,21 @@ function ManagerDashboard() {
 function DataEntry() {
   const [formData, setFormData] = useState({
     date: '2024-02-01',
-    weightInPounds: 10.00,
+    weightInPounds: null,
     landfillFee: null,
-    buyerRevenue: 5.00,
+    buyerRevenue: null,
     category: {
       categoryId: null,
     },
     buyer: {
-      buyerId: 2,
+      buyerId: null,
     },
   });
+
+const categoryType = [{"category_id": 1,
+"category_name": "Landfill Waste"}, { "category_id": 2,
+"category_name": "Compost"}, {"category_id": 3,
+"category_name": "Recyclables",} ]
 
   const categoryData = [
     {
@@ -173,19 +178,26 @@ function DataEntry() {
     const { name, value } = event.target;
   
     if (name === 'category') {
-      const selectedCategory = categoryData.find(cat => cat.category_id === parseInt(value));
-      
+      // Find the selected category from categoryType using category_name
+      const selectedCategory = categoryType.find(cat => cat.category_name === value);
+  
+      // Update the form data with the selected category and reset subCategory
       setFormData(prevFormData => ({
         ...prevFormData,
-        category: { categoryId: selectedCategory.category_id },
+        category: {
+          categoryId: selectedCategory ? selectedCategory.category_id : null,
+          categoryName: value // Update with categoryName instead of categoryId
+        },
         subCategory: '' // Reset subCategory when category changes
       }));
     } else if (name === 'subCategory') {
+      // Update the subCategory directly
       setFormData(prevFormData => ({
         ...prevFormData,
         [name]: value
       }));
     } else if (name === 'buyerId') {
+      // Update buyerId under buyer object
       setFormData(prevFormData => ({
         ...prevFormData,
         buyer: {
@@ -194,12 +206,14 @@ function DataEntry() {
         }
       }));
     } else {
+      // For other inputs, update directly
       setFormData(prevFormData => ({
         ...prevFormData,
         [name]: value
       }));
     }
   };
+  
   
   
   
@@ -245,19 +259,45 @@ function DataEntry() {
   //   }
   // };
   
-
   const handleSubmit = (event) => {
     event.preventDefault();
+  
+    let categoryId = null;
+    
+    // If the selected category is "Recyclables", find the category based on waste type and sub-waste type
+    if (formData.category.categoryName === "Recyclables") {
+      let selectedCategory = null;
+      if (formData.subWasteType) {
+        selectedCategory = categoryData.find(cat => cat.sub_waste_type === formData.subWasteType);
+      } else if (formData.wasteType) {
+        selectedCategory = categoryData.find(cat => cat.waste_type === formData.wasteType);
+      }
+      
+      // If selectedCategory is found, set categoryId, otherwise, set it to null
+      categoryId = selectedCategory ? selectedCategory.category_id : null;
+    } else {
+      // For "Landfill Waste" and "Compost", use predefined category IDs
+      if (formData.category.categoryName === "Landfill Waste") {
+        categoryId = 1; // Landfill Waste category ID
+      } else if (formData.category.categoryName === "Compost") {
+        categoryId = 2; // Compost category ID
+      }
+    }
+  
+    // Create the new entry object
     const newEntry = {
       date: formData.date,
       weightInPounds: parseFloat(formData.weightInPounds),
-      landfillFee: formData.category.categoryName === 'Landfill Waste' ? formData.landfillFee : null,
+      landfillFee: parseFloat(formData.landfillFee) || null,
       buyerRevenue: parseFloat(formData.buyerRevenue),
-      category: formData.category,
-      subCategory: formData.category.categoryName === 'Recyclables' ? formData.subCategory : '',
+      category: categoryId ? { categoryId } : null,
       buyer: { buyerId: parseInt(formData.buyer.buyerId) || null }
     };
+  
+    // Log the new entry
     console.log(newEntry);
+  
+    // Reset the form data
     setFormData({
       date: '',
       weightInPounds: '',
@@ -265,18 +305,21 @@ function DataEntry() {
       buyerRevenue: '',
       category: {
         categoryId: null,
-        categoryName: ''
       },
-      subCategory: '',
       buyer: {
         buyerId: ''
       }
     });
   };
   
+  
   const renderSubCategories = () => {
-    const selectedCategory = categoryData.find(cat => cat.category_id === parseInt(formData.category.categoryId));
+    // Find the selected category from categoryType
+    const selectedCategory = categoryType.find(cat => cat.category_name === formData.category.categoryName);
+  
+    // If selectedCategory exists
     if (selectedCategory) {
+      // Switch based on the category_name
       switch (selectedCategory.category_name) {
         case 'Landfill Waste':
           return (
@@ -292,10 +335,16 @@ function DataEntry() {
               />
             </label>
           );
+        case 'Compost':
+          // Render specific fields for Compost
+          return (
+            <p>Fields for Compost</p>
+          );
         case 'Recyclables':
+          // Render fields for Recyclables including waste type and sub-waste type
           return (
             <>
-            <label htmlFor="buyerId" className="block text-gray-700 font-medium mt-4">
+               <label htmlFor="buyerId" className="block text-gray-700 font-medium mt-4">
         Buyer ID:
         <input
           type="number"
@@ -307,23 +356,47 @@ function DataEntry() {
           className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </label>
-              <label htmlFor="subCategory" className="block text-gray-700 font-medium mt-4">
-                Sub Waste Type:
+              <label htmlFor="wasteType" className="block text-gray-700 font-medium mt-4">
+                Waste Type:
               </label>
               <select
-                id="subCategory"
-                name="subCategory"
-                value={formData.subCategory}
+                id="wasteType"
+                name="wasteType"
+                value={formData.wasteType}
                 onChange={handleInputChange}
                 className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 required
               >
-                <option value="">Select Sub Waste Type</option>
-                {categoryData.filter(cat => cat.category_name === 'Recyclables').map(cat => (
-                  <option key={cat.category_id} value={cat.sub_waste_type}>{cat.sub_waste_type}</option>
-                ))}
+                <option value="">Select Waste Type</option>
+                {categoryData
+                  .filter(cat => cat.category_name === 'Recyclables')
+                  .map(cat => (
+                    <option key={cat.category_id} value={cat.waste_type}>{cat.waste_type}</option>
+                  ))}
               </select>
-              
+              {/* Render sub-waste type select only if wasteType is selected */}
+              {formData.wasteType && (
+                <>
+                  <label htmlFor="subWasteType" className="block text-gray-700 font-medium mt-4">
+                    Sub Waste Type:
+                  </label>
+                  <select
+                    id="subWasteType"
+                    name="subWasteType"
+                    value={formData.subWasteType}
+                    onChange={handleInputChange}
+                    className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select Sub Waste Type</option>
+                    {categoryData
+                      .filter(cat => cat.category_name === 'Recyclables' && cat.waste_type === formData.wasteType)
+                      .map(cat => (
+                        <option key={cat.category_id} value={cat.sub_waste_type}>{cat.sub_waste_type}</option>
+                      ))}
+                  </select>
+                </>
+              )}
             </>
           );
         default:
@@ -333,6 +406,7 @@ function DataEntry() {
       return null;
     }
   };
+  
   
   
   
@@ -367,22 +441,26 @@ function DataEntry() {
           required
         />
       </label>
+      
       <label htmlFor="category" className="block text-gray-700 font-medium mt-4">
-        Category:
-        <select
-          id="category"
-          name="category"
-          value={formData.category.categoryId || ''}
-          onChange={handleInputChange}
-          className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          required
-        >
-          <option value="">Select Category</option>
-          {categoryData.map(cat => (
-            <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
-          ))}
-        </select>
-      </label>
+  Category:
+  <select
+    id="category"
+    name="category"
+    value={formData.category.categoryName || ''}
+    onChange={handleInputChange}
+    className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    required
+  >
+    <option value="">Select Category</option>
+    {categoryType.map(cat => (
+      <option key={cat.category_id} value={cat.category_name}>{cat.category_name}</option>
+    ))}
+  </select>
+</label>
+
+
+
       {renderSubCategories()}
       
       <button type="submit" className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
