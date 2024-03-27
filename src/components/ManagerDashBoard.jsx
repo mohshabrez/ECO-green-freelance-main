@@ -8,6 +8,7 @@ import MonthWiseType from './reports/monthWiseType';
 import RecyclableWeightsPie from './reports/recyclableWeightsPie';
 import RevenueDatePie from './reports/revenueDatePie';
 import WasteTypeLine from './reports/wasteTypeLine';
+import MonthlyRevenueTable from './monthlyRevenueTable';
 
 function ManagerDashboard() {
   const [activeSection, setActiveSection] = useState('Data Entry');
@@ -356,6 +357,18 @@ const categoryType = [{"category_id": 1,
           className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </label>
+      <label htmlFor="buyerRevenue" className="block text-gray-700 font-medium mt-4">
+        Buyer Revenue:
+        <input
+          type="number"
+          id="buyerRevenue"
+          name="buyerRevenue"
+          value={formData.buyerRevenue === null ? '' : formData.buyerRevenue}
+          onChange={handleInputChange}
+          required
+          className="w-fit rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </label>
               <label htmlFor="wasteType" className="block text-gray-700 font-medium mt-4">
                 Waste Type:
               </label>
@@ -473,7 +486,7 @@ const categoryType = [{"category_id": 1,
 
 
         <h2 className="text-center text-xl font-bold mt-4">Dummy Data Table</h2>
-        <table className="w-full table-auto shadow-md rounded-lg">
+        {/* <table className="w-full table-auto shadow-md rounded-lg">
           <thead>
             <tr className="bg-gray-100 text-left text-sm font-medium">
               <th className="px-4 py-2">FY24</th>
@@ -499,7 +512,7 @@ const categoryType = [{"category_id": 1,
               <td className="px-4 py-2">14,057.82</td>
               <td className="px-4 py-2">4,582.22</td>
               <td className="px-4 py-2">18,675.04</td>
-              {/* Add more data as needed */}
+              
             </tr>
             <tr>
               <td className="px-4 py-2">Landfill lbs.</td>
@@ -507,7 +520,7 @@ const categoryType = [{"category_id": 1,
               <td className="px-4 py-2">75,600</td>
               <td className="px-4 py-2">79,800</td>
               <td className="px-4 py-2">203,245</td>
-              {/* Add more data as needed */}
+              
             </tr>
             <tr>
               <td className="px-4 py-2">Compost</td>
@@ -515,11 +528,12 @@ const categoryType = [{"category_id": 1,
               <td className="px-4 py-2">10,360</td>
               <td className="px-4 py-2">28,800</td>
               <td className="px-4 py-2">46,260</td>
-              {/* Add more data as needed */}
+            
             </tr>
-            {/* Add more rows for other data */}
+            
           </tbody>
-        </table>
+        </table> */}
+        <MonthlyRevenueTable/>
       </div>
     );
     }    

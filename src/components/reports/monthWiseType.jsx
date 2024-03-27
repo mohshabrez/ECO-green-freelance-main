@@ -2,6 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 
 function MonthWiseType() {
+  // const [allWasteTypesData, setAllWasteTypesData] = useState([]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await fetch('http://localhost:8080/api/summary-report/waste-summary');
+  //       if (!response.ok) {
+  //         throw new Error('Network response was not ok');
+  //       }
+  //       const jsonData = await response.json();
+  //       setAllWasteTypesData(jsonData);
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []); 
   const allWasteTypesData = [
     {
       "month": "January",

@@ -2,22 +2,25 @@ import { useState, useEffect } from 'react';
 import Chart from 'chart.js/auto';
 
 function YearLineChart() {
-//   const [recyclableData, setRecyclableData] = useState([]);
-const [selectedYear, setSelectedYear] = useState(2024); // Initial selected year
+  // const [recyclableData, setRecyclableData] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(2024); // Initial selected year
 
-//   useEffect(() => {
-//     // Mock API call (replace with your actual API call)
-//     // Assume data is fetched from the provided API endpoint
-//     const fetchData = () => {
-//       // Your API call to fetch data
-//       const apiData = [
-//         // Recyclable Summary Report data goes here
-//       ];
-//       setRecyclableData(apiData);
-//     };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await fetch('http://localhost:8080/api/summary-report/recyclable-summary');
+  //       if (!response.ok) {
+  //         throw new Error('Network response was not ok');
+  //       }
+  //       const jsonData = await response.json();
+  //       setRecyclableData(jsonData);
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     }
+  //   };
 
-//     fetchData();
-//   }, []); // Fetch data only on initial render
+  //   fetchData();
+  // }, []); 
 
 
   const recyclableData = [
