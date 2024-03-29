@@ -556,7 +556,7 @@ const categoryType = [{"category_id": 1,
           <MonthWiseType/>
         </div>
         <div>
-          {/* <RecyclableWeightsPie/> */}
+          <RecyclableWeightsPie/>
         </div>
         <div>
           {/* <RevenueDatePie/> */}

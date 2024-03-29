@@ -1,135 +1,117 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Chart from 'chart.js/auto';
-import axios from 'axios';
-import 'flatpickr/dist/themes/material_green.css'; // Import flatpickr styles
-import flatpickr from 'flatpickr';
+import Flatpickr from 'react-flatpickr';
+import 'flatpickr/dist/themes/material_blue.css';
 
-function DateFilter({ onChange }) {
-  const startDateRef = useRef(null);
-  const endDateRef = useRef(null);
-
-  const handleApplyFilter = () => {
-    onChange(startDateRef.current.selectedDates[0], endDateRef.current.selectedDates[0]);
-  };
+const RecyclableWeightsPie = () => {
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [data, setData] = useState([]);
 
   useEffect(() => {
-    flatpickr(startDateRef.current, {
-      dateFormat: 'Y-m-d',
-      onClose: selectedDates => {
-        if (selectedDates.length > 0) {
-          endDateRef.current.set('minDate', selectedDates[0]);
-        }
-      }
-    });
-
-    flatpickr(endDateRef.current, {
-      dateFormat: 'Y-m-d',
-      onClose: selectedDates => {
-        if (selectedDates.length > 0) {
-          startDateRef.current.set('maxDate', selectedDates[0]);
-        }
-      }
-    });
-  }, []);
-
-  return (
-    <div>
-      <input ref={startDateRef} type="text" placeholder="Start Date" className="date-picker" />
-      <input ref={endDateRef} type="text" placeholder="End Date" className="date-picker" />
-      <button className="apply-button" onClick={handleApplyFilter}>Apply</button>
-    </div>
-  );
-}
-
-function RecyclableWeightsPie() {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-
-  const handleDateFilterChange = (start, end) => {
-    setStartDate(start);
-    setEndDate(end);
-  };
-
-  return (
-    <div>
-      <h1>Recyclable Weight Percentage</h1>
-      <DateFilter onChange={handleDateFilterChange} />
-      <MainComponent startDate={startDate} endDate={endDate} />
-    </div>
-  );
-}
-
-function MainComponent({ startDate, endDate }) {
-  const [recyclableData, setRecyclableData] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/api/summary-report/recyclable-weight?startDate=${startDate}&endDate=${endDate}`);
-        setRecyclableData(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
     fetchData();
   }, [startDate, endDate]);
 
-  useEffect(() => {
-    renderPieChart();
-  }, [recyclableData]); // Re-render pie chart when recyclableData changes
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    console.log(`${year}-${month}-${day}`)
+    return `${year}-${month}-${day}`;
+  };
 
-  const renderPieChart = () => {
-    const chartData = {
-      labels: recyclableData.map(entry => entry.recyclableType),
-      datasets: [{
-        label: 'Weight Percentage',
-        data: recyclableData.map(entry => entry.weightPercentage),
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.7)',
-          'rgba(54, 162, 235, 0.7)',
-          'rgba(255, 206, 86, 0.7)',
-          'rgba(75, 192, 192, 0.7)',
-          'rgba(153, 102, 255, 0.7)',
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-        ],
-      }],
-    };
+//   const data = [
+//     {
+//         "recyclableType": "Cardboard",
+//         "totalWeight": 12.0,
+//         "weightPercentage": 1.948051948051948
+//     },
+//     {
+//         "recyclableType": "Glass",
+//         "totalWeight": 24.0,
+//         "weightPercentage": 3.896103896103896
+//     },
+//     {
+//         "recyclableType": "Paper",
+//         "totalWeight": 144.0,
+//         "weightPercentage": 23.376623376623375
+//     },
+//     {
+//         "recyclableType": "Metal",
+//         "totalWeight": 190.0,
+//         "weightPercentage": 30.844155844155846
+//     },
+//     {
+//         "recyclableType": "Plastic",
+//         "totalWeight": 180.0,
+//         "weightPercentage": 29.22077922077922
+//     }
+// ]
 
-    const canvas = document.getElementById('recyclableWeightPieChart');
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      const existingChart = Chart.getChart(ctx);
-      if (existingChart) {
-        existingChart.destroy(); // Destroy existing chart
-      }
-      new Chart(ctx, {
-        type: 'pie',
-        data: chartData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-            },
-            title: {
-              display: true,
-              text: 'Recyclable Weight Percentage',
-            },
-          },
-        },
-      });
+  const fetchData = async () => {
+    const startDateFormatted = formatDate(startDate);
+    const endDateFormatted = formatDate(endDate);
+    const apiUrl = `http://localhost:8080/api/summary-report/recyclable-weight?startDate=${startDateFormatted}&endDate=${endDateFormatted}`;
+
+    try {
+      const response = await fetch(apiUrl);
+      const jsonData = await response.json();
+      setData(jsonData);
+      updateChart(jsonData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
     }
   };
 
-  return <canvas id="recyclableWeightPieChart" />;
-}
+  const updateChart = (data) => {
+    const labels = data.map(item => item.recyclableType);
+    const values = data.map(item => item.weightPercentage);
+
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        legend: {
+          position: 'right'
+        }
+      }
+    });
+  };
+
+  return (
+    <div>
+      <h2>Recyclable Revenue Report</h2>
+      <label htmlFor="startDate">Start Date:</label>
+      <Flatpickr
+        id="startDate"
+        value={startDate}
+        onChange={date => setStartDate(date[0])}
+        options={{ dateFormat: 'Y-m-d' }}
+      />
+      <label htmlFor="endDate">End Date:</label>
+      <Flatpickr
+        id="endDate"
+        value={endDate}
+        onChange={date => setEndDate(date[0])}
+        options={{ dateFormat: 'Y-m-d' }}
+      />
+      <canvas id="pieChart" width="400" height="400"></canvas>
+    </div>
+  );
+};
 
 export default RecyclableWeightsPie;
