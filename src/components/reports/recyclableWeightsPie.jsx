@@ -1,38 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import axios from 'axios';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import 'flatpickr/dist/themes/material_green.css'; // Import flatpickr styles
+import flatpickr from 'flatpickr';
 
 function DateFilter({ onChange }) {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const startDateRef = useRef(null);
+  const endDateRef = useRef(null);
 
   const handleApplyFilter = () => {
-    onChange(startDate, endDate);
+    onChange(startDateRef.current.selectedDates[0], endDateRef.current.selectedDates[0]);
   };
+
+  useEffect(() => {
+    flatpickr(startDateRef.current, {
+      dateFormat: 'Y-m-d',
+      onClose: selectedDates => {
+        if (selectedDates.length > 0) {
+          endDateRef.current.set('minDate', selectedDates[0]);
+        }
+      }
+    });
+
+    flatpickr(endDateRef.current, {
+      dateFormat: 'Y-m-d',
+      onClose: selectedDates => {
+        if (selectedDates.length > 0) {
+          startDateRef.current.set('maxDate', selectedDates[0]);
+        }
+      }
+    });
+  }, []);
 
   return (
     <div>
-      <DatePicker
-       className="date-picker"
-        selected={startDate ? new Date(startDate) : null}
-        onChange={date => setStartDate(date ? date.toISOString().split('T')[0] : '')}
-        selectsStart
-        startDate={startDate ? new Date(startDate) : null}
-        endDate={endDate ? new Date(endDate) : null}
-        placeholderText="Start Date"
-      />
-      <DatePicker
-       className="date-picker"
-        selected={endDate ? new Date(endDate) : null}
-        onChange={date => setEndDate(date ? date.toISOString().split('T')[0] : '')}
-        selectsEnd
-        startDate={startDate ? new Date(startDate) : null}
-        endDate={endDate ? new Date(endDate) : null}
-        minDate={startDate ? new Date(startDate) : null}
-        placeholderText="End Date"
-      />
+      <input ref={startDateRef} type="text" placeholder="Start Date" className="date-picker" />
+      <input ref={endDateRef} type="text" placeholder="End Date" className="date-picker" />
       <button className="apply-button" onClick={handleApplyFilter}>Apply</button>
     </div>
   );
@@ -46,7 +49,7 @@ function RecyclableWeightsPie() {
     setStartDate(start);
     setEndDate(end);
   };
-  console.log(startDate,endDate)
+
   return (
     <div>
       <h1>Recyclable Weight Percentage</h1>
@@ -55,8 +58,6 @@ function RecyclableWeightsPie() {
     </div>
   );
 }
-
-
 
 function MainComponent({ startDate, endDate }) {
   const [recyclableData, setRecyclableData] = useState([]);
